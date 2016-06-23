@@ -16,12 +16,15 @@
 	}
 	function saveNew() {
 	    setCookie(window.f1.window1.value);
-	    alert(window.f1.window1.value);	
+	    var user=window.f1.window1.value;
+	    document.getElementById("new").innerHTML = "<hr width='90%' class='next'>\
+	    <h2 class='text-center'>Your new username is " + user +  ".</h2>\
+	<h2 class='text-center'><a href='event.html'>Click here to go back to the main page.</a></h2>";
 	}
 	</script>
 </head>
 
-<body onLoad='loaded()'>
+<body onLoad='loaded()' class="event">
 	<nav class="navbar-inverse navbar-fixed-top">
 		<div class="container-fluid">
 			<div class="navbar-header">
@@ -40,7 +43,6 @@
     			<ul class="nav navbar-nav theme">
       				<li class=""><a href="index.html">Home</a></li>
       				<li><a href="newevent.html">Create a New Event</a></li>
-      				<li><a href="joinevent.html">Join an Event</a></li>
       				<li><a href="changeuser.html">Change Username</a></li>
       				<li><a href="deleteuser.html">Delete User</a></li>
       				<li><a href=" ">Back to IoT Space</a></li>
@@ -52,20 +54,21 @@
 		<img src="Helper/Images/co.png" alt="Coordinator" class="center" align="middle">
 		<hr width="95%" class="next-close">
 	</h1>
-	<form name='f1' class="form-horizontal col-xs-11">
- 		<div class="form-group">
-    		<label class="control-label">New Username:</label>
-  			<input name="window1" type="username" class="form-control" id="username" placeholder=getCookie()>
-  			<button type="button" onClick="saveNew()" class="btn btn-default">Submit</button>
-  		</div>
-	</form>
-	<hr width="90%" class="next">
+	<div class="col-xs-6">
+		<form name='f1' class="form-horizontal col-xs-11">
+	 		<div class="form-group">
+	    		<label class="control-label">New Username:</label>
+	  			<input name="window1" type="username" class="form-control" id="username">
+	  			<br>
+	  			<button type="button" onClick="saveNew()" class="btn btn-default">Submit</button>
+	  		</div>
+		</form>
+	</div>
+
 
 	<div id="new">
 	</div>
 
-	<h2 class="text-center">Your new username is </h2>
-	<h2 class="text-center"><a href="index.html">Click here to go back to the main page.</a></h2>
 
 </body>
 

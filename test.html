@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="Helper/XHRequest.js"></script>
+  <!--link rel="stylesheet" href="test.css"-->
+  <script type="text/javascript">
+  	function hi() {
+  		XHRequest.createRequest({url: "http://192.168.3.123/coordinator/scripts/first.py", success: mySuccessFunction});
+  	}
+
+    function mySuccessFunction(arg1, arg2, arg3) {
+      console.log(arg1);
+      //console.log(arg2);
+      //console.log(arg3);
+      console.log(arg1.responseText.booll)
+    }
+  </script>
+
+</head>
+<body>
+	<button onclick="hi()">hi</button>
+
+
+</body>
+</html>

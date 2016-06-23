@@ -8,6 +8,13 @@ if (typeof jQuery === 'undefined') {
   throw new Error('Bootstrap\'s JavaScript requires jQuery')
 }
 
+/*Custom add to collapse navbar*/
+$(document).ready(function () {
+    $("nav").find("li").on("click", "a", function () {
+        $('.navbar-collapse.in').collapse('hide');
+    });
+});
+
 +function ($) {
   'use strict';
   var version = $.fn.jquery.split(' ')[0].split('.')
@@ -243,7 +250,6 @@ if (typeof jQuery === 'undefined') {
       this.$element.toggleClass('active')
     }
   }
-
 
   // BUTTON PLUGIN DEFINITION
   // ========================
