@@ -1,0 +1,143 @@
+<!DOCTYPE HTML>
+<html lang = "en">
+	<head>
+		<title>Coordinator - Event</title>
+		<link href ="Helper/bootstrap.css" rel="stylesheet" type = "text/css">
+		<link href ="Helper/organize.css" rel="stylesheet" type = "text/css">
+		<link href="Helper/Images/icon.png" rel="icon">
+		<link href = "https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+		<meta name = "viewport" content="initial-scale=1.0">
+		<script src="Helper/jquery-2.2.4.min.js" type="text/javascript"></script>
+		<script src="Helper/bootstrap.js" type="text/javascript"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0">
+    		</script>
+    		<script src="Helper/cookiesk.js" type="text/javascript"></script>
+	</head>
+	<body class="static-nav">
+		<nav class="navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+			      		<span class="sr-only">Toggle navigation</span>
+			      		<span class="icon-bar"></span>
+			      		<span class="icon-bar"></span>
+			      		<span class="icon-bar"></span>
+		        	</button>
+	    			<a href="index.html" class="navbar-brand">
+	    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
+	    			</a>
+				</div>
+	    		<div id="navbar" class="navbar-collapse collapse">
+	    			<ul class="nav navbar-nav theme">
+	      				<li class=""><a href="index.html">Home</a></li>
+	      				<li class="active"><a href="newevent.html">Create a New Event</a></li>
+	      				<li><a href="changeuser.html">Change Username</a></li>
+	      				<li><a href="www.iotspace.tech">Back to IoT Space</a></li>
+	    			</ul>
+	    		</div>
+	 		</div>
+		</nav>
+
+		<div class="text-center">
+			<img src="Helper/Images/co.png" alt="Coordinator" class="page-logo">
+			<hr width="65%" class="next-close">
+		</h1>
+		<!--AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0>
+		<!div class="size"
+			<iframe width="100%" height="80%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJEf1nWlY0joARpclcbmlnKdU&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0" allowfullscreen
+			</iframe
+		</div> -->
+
+		<div class="text-center">
+			<h3 class="col-md-3">Your time from destination: 0 min</h3>
+			<h3 class="col-md-3">Sohenee from your destination: 18 min</h3>
+			<h3 class="col-md-3">Vedant from destination: 10 min</h3>
+			<h3 class="col-md-3">Friend 2 from destination: 30 min</h3>
+		</div>
+		<hr class="next" width="75%">
+		<h5 id="user">Hello, User<h5>
+		<div class="location" id="map">
+			hi
+		</div>
+		<script>/*
+			//setCookie("");
+			var lat, lon;
+			function displayCookie() {
+				var user_valid = getCookie();
+				if (user_valid != "" && user_valid != null && user_valid != " ") {
+					var user = user_valid;
+					console.log("user="+user);
+				}
+				else {
+					var user = prompt("Enter your username");
+					setCookie(user);
+				}
+				if (user != null) {
+					document.getElementById("user").innerHTML = "<h5>Welcome, " + user + ".</h5>	";
+				}
+				else {
+					document.getElementById("user").innerHTML = "Welcome, user."
+				}
+			}
+			console.log("Starting location");
+			function showLocation () {
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(showPosition);
+				}
+			}
+			function showPosition(position) {
+				lat = position.coords.latitude;
+				lon = position.coords.longitude;
+				console.log("Location input");
+				var current = new google.maps.Marker({
+					animation: google.maps.Animation.DROP,
+			  		position: {lat: lat, lng:lon},
+			  		
+			  		map: map,
+			  		//animation: google.maps.Animation.DROP,
+			  		title: 'Your position'
+		  		});
+			}
+			console.log("position");
+			var map;
+			var destination = {lat: 37.3052098, lng: -121.9451841};
+			map = new google.maps.Map(document.getElementById('map'), {
+				center: destination,
+				zoom: 10
+			}); 
+			console.log("Marker" + lat);
+		  	var location = new google.maps.Marker({
+		  		position: destination,
+		  		icon: {
+      				path: google.maps.SymbolPath.CIRCLE,
+      				scale: 7
+   				},
+		  		map: map,
+		  		title: 'Destination'
+		  	});
+		  	var friend_location = {lat:37.312235, lng:-121.991809}
+		  	var friend = new google.maps.Marker({
+		  		position: friend_location,
+		  		map: map,
+		  		title: "Friend"
+		  	});
+		  	displayCookie();
+		  	showLocation();
+
+		*/</script>
+
+		
+		
+		<hr width="75%" class="next">
+		
+
+
+		<!--script type="text/javascript"
+			var url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=37.291048|-121.777052";
+			$.getJSON(url, function (json) {
+				var time = json.results[0]["rows"][0]["elements"][0]["duration"]["text"];
+			});
+		</script> -->
+	</body> 
+
+</html>
