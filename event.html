@@ -15,14 +15,15 @@
     	<script src="Helper/XHRequest.js"></script>
     	<script>
 
-    		if (getUserCookie("valid_user") != "true") {
-	    		if (prompt("Enter password") != "2357") {
-	    			window.location="index.html";
-	    		}
-	    		else {
-	    			setUserCookie("valid_user", "true")
-	    		}
-	    	}
+
+    		//if (getUserCookie("valid_user") != "true") {
+	    	//	if (prompt("Enter password") != "2357") {
+	    	//		window.location="index.html";
+	    	//	}
+	    	//	else {
+	    	//		setUserCookie("valid_user", "true")
+	    	//	}
+	    	//}
     		var users;
     		var my_data = "";
     		var map;
@@ -330,7 +331,7 @@
 		  		if (original == "") {
 		  			document.getElementById("action").innerHTML = "\
 					<div class='action'>\
-						<a class='custom-btn' href='#map' id='show_map_button'><button class='btn btn-default btn-sm'>Jump to map</button>\
+						<a class='custom-btn' href='#map' id='show_map_button'><button class='btn btn-default btn-sm'>Scroll to Map</button>\
 						</a>\
 						<a class='custom-btn' href='http://maps.google.com/?daddr=37.321463,-121.947924' target='_blank' ><button id='start_directions'\
 							class='btn btn-default btn-sm'>Start Directions</button>\
@@ -400,7 +401,7 @@
 
 		<div class="header" id="action">
 			<div class="action">
-				<a class="custom-btn" href='#map' id="show_map_button"><button class="btn btn-default btn-sm">Jump to map</button>
+				<a class="custom-btn" href='#map' id="show_map_button"><button class="btn btn-default btn-sm">Scroll to map</button>
 				</a>
 
 				<a class="custom-btn" href="http://maps.google.com/?daddr=37.321463,-121.947924" target="_blank" ><button id="start_directions" 
@@ -416,6 +417,9 @@
 				<a class="custom-btn"><button class="btn btn-default btn-sm" onclick = "deleteT()">Del</button></a>
 
 				<a class="custom-btn"><button class="btn btn-default btn-sm" onclick="updateWhenReady()">Refresh</button></a>
+
+				
+
 			</div>
 		</div>
 

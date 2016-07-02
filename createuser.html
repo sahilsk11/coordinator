@@ -17,18 +17,22 @@
 			var lon = "";
 			showLocation();
 			function showLocation () {
+				console.log("Starting lcation");
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(showPosition);
+					console.log("starting showPosition");
 				}
 				else {
+					console.log("Retrieve stopped");
 					document.getElementById("wait").innerHTML = "Could not find location.";
 				}
 			}
 
-
+			setTime
 			
 
 			function showPosition(position) {
+				console.log("setting coordinates");
 				lat = position.coords.latitude;
 				lon = position.coords.longitude;
 				console.log("Location input");
@@ -162,7 +166,7 @@
 	  			</div>
 			</form>
 		</div>
-		<p id="wait" class="lead">Loading...</p>
+		<p id="wait" class="lead"><b>Waiting for location</b><br>Please check that location is enabled for your device and you have allowed the page to access it.</p>
 
 		<div>
 			<p class="lead col-xs-6">You can change your username whenever you want from the Change Username screen. Your username should be more than one character and provide a description of who you are.</p>
