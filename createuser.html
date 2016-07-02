@@ -15,7 +15,7 @@
 		<script>
 			var lat = "";
 			var lon = "";
-			showLocation();
+			//showLocation();
 			function showLocation () {
 				console.log("Starting lcation");
 				if (navigator.geolocation) {
@@ -64,6 +64,7 @@
 				document.getElementById("new").innerHTML = "<hr width='90%' class='next'>\
 				    <h2 class='text-center'>Your new username is " + user +  ".</h2>\
 					<h2 class='text-center'><a href='event.html'>Click here to go back to the main page.</a></h2>";
+					window.location = "event.html";
 			}
 
 			function displayUsed() {
@@ -124,7 +125,7 @@
 		</script>
 	</head>
 
-	<body class="static-nav">
+	<body class="static-nav" onload="showLocation()">
 		<nav class="navbar-inverse">
 			<div class="container-fluid">
 				<div class="navbar-header">
