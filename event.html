@@ -33,6 +33,7 @@
 			var plon = "";
 			var exit_code;
 			var markers = [];
+			var initial_start = true;
 
 			//deletes event
 			//related: none
@@ -52,26 +53,31 @@
 	    		}
     		}
 
-  
-
     		//updates the current user with lat and lon
     		//precondition: location set
     		//related : none
     		function update() {
-    			console.log("updating user");
+    			console.log("updating");
 				var user;
 				user = getUserCookie("name");
     			function interpret(xhr, xhrConfig) {
     				var data = JSON.parse(xhr.responseText);
+    				console.log("updated");
     				if (data.complete == "Location") {
     					//location invalid
     				}
     				else if (data.complete == "True") {
-    					console.log("data updated");
-    					initPage(""); //init called within update
+    					if (initial == true) {
+    						initial = false;
+    						console.log("first init");
+    						initPage("map"); //init called within update
+    					}
+    					else {
+    						initPage("");
+    					}
     				}
     				else {
-    					//destination invalid
+    					window.location = "newevent.html";
     				}
     			}
     			XHRequest.createRequest({
@@ -110,21 +116,17 @@
     		//success when "show" is called also displays interprets data and redirects
     		//related: check, showUsers
     		function success(xhr, xhrConfig) {
+    			console.log("looking");
     			my_data = JSON.parse(xhr.responseText);
     			users = my_data.users;
-    			var found = false;
+    			var user_valid = false;
     			for (var i = 0; i < users; i++) {
     				if (my_data.people[i].name == getUserCookie("name")) {
-    					found = true;
-    					showUsers(); //called showUsers
-    					destination = {lat: my_data.destination.lat, lng: my_data.destination.lon};
-    					startMap();
-    					showDestination();
-    					showAll();
+    					user_valid = true;
     				}
     			}
-
-    			if (found == false) {
+    			console.log(user_valid);
+    			if (user_valid == false) {
     				setUserCookie("name", "");
     				if (my_data.destination.set == "no") {
     					window.location = "newevent.html";
@@ -133,13 +135,27 @@
     					window.location = "createuser.html";
     				}
     			}
+    			else {
+					showUsers(); //called showUsers
+					destination = {lat: my_data.destination.lat, lng: my_data.destination.lon};
+					if (initial_start) {
+						initial_start = false;
+						startMap();
+					}
+					showDestination();
+					showAl();
+    			}
+    		
     		}
 
     		//retrieves information and calls others to use it
     		//related: success, showUsers
-    		function initPage(methods) {
+    		function initPage() {
+    			document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
+					<h5 class='text-center'>Searching for users</h5>";
     			my_data = "";
     			users = null;
+    			markers = [];
     			if (methods == "map"){
 	    			XHRequest.createRequest({
 						success: success, 
@@ -170,7 +186,7 @@
     					showUsers(); //called showUsers
     					destination = {lat: my_data.destination.lat, lng: my_data.destination.lon};
     					showDestination();
-    					showAll();
+    					showAl();
     				}
     			}
 
@@ -239,7 +255,7 @@
 			//starts location
 			//related: showPosition
 			function showLocation () {
-				console.log("Starting location search");
+				console.log("Starting location");
 				if (navigator.geolocation) {
 					navigator.geolocation.getCurrentPosition(showPosition);
 				}
@@ -278,53 +294,78 @@
 			  	});
 		  	}
 
-
-		  	function showUpdate() {
-		  		update();
-		  		initMap();
-		  		console.log("reload");
-		  	}
-
 		  	function UpdateHelper() {
-		  		console.log("update helper: now");
 		  		if (position_set == true) {
+		  			console.log("stop refresh");
 		  			window.clearInterval(exit_code);
-		  			console.log("done");
 		  			update();
 		  		}
 		  	}
 
 		  	function updateWhenReady() {
+		  		document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
+					<h5 class='text-center'>Finding information</h5>";
+				plat = "";
+				plat = "";
+				position_set = false;
+				showLocation();
 		  		if (position_set == false) {
-		  			console.log("update: trying in a few");
+		  			document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
+						<h5 class='text-center'>Updating Location</h5>";
 		  			exit_code = window.setInterval(UpdateHelper, 5000);
+		  			console.log(exit_code);
 		  		}
 		  		else {
-		  			console.log("starting");
 		  			update();
 		  		}
 		  	}
 
+		  	/*
 		  	function showAll() {
 		  		var lat;
 		  		var lon;
 		  		var username;
-		  		for (var u = 0; u < markers.lengthl; u+=1) {
+		  		for (var u = 0; u < markers.length; u+=1) {
 		  			markers[u].setMap(null);
 		  		}
+		  		markers = [];
 		  		for (var i = 0; i < users; i++) {
+		  			console.log(i);
 		  			username = my_data.people[i].name;
 		  			lat = my_data.people[i].lat;
 		  			lon = my_data.people[i].lon;
-		  			var marker = new google.maps.Marker({
+		  			var marker = {
 			  			position: {lat: lat, lng:lon},
 			  			map: map,
 			  			title: username+'\'s position',
 			  			label: username.substring(0,1)
+		  			};
+		  			eval(username+"_marker= null");
+		  			eval(username+"_marker= new google.maps.Marker(marker)");
+		  			markers.push(eval(username+"_marker"));
+		  			for (var u = 0; u < markers.length; u+=1) {
+		  				console.log(markers[u]);
+		  			}
+		  		}
+		  	}
+		  	*/
+
+		  	function showAl() {
+		  		var lat;
+		  		var lon;
+		  		var username;
+		  		for (var y = 0; y < markers.length; y+=1) {
+		  			markers[y].setMap(null);
+		  		}
+		  		markers = [];
+		  		for (var y = 0; y < users; y+=1) {
+		  			lat = my_data.people[y].lat;
+		  			lon = my_data.people[y].lon;
+		  			var marker = new google.maps.Marker({
+		  				position: {lat: lat, lng: lon},
+		  				map: map
 		  			});
-		  			eval("var " + username+i+" = marker");
-		  			markers.push(username+i);
-		  			marker = null;
+		  			markers.push(marker);
 		  		}
 		  	}
 
@@ -353,13 +394,20 @@
 		  		}
 		  	}
 
+		  	function start() {
+		  		showLocation(); //does not need other methods
+				displayCookie(); //does not need other methods
+		  		updateWhenReady();
+		  	}
+
 			window.setInterval(function(){
 		  		updateWhenReady();
 			}, 120000);
+
     		
     	</script>
 	</head>
-	<body class="static-nav">
+	<body class="static-nav" onload="start()">
 		<a id="top"></a>
 		<nav class="navbar-inverse">
 			<div class="container-fluid">
@@ -394,8 +442,9 @@
 			</iframe
 		</div> -->
 		<h5 id="user" class="col-offset-xs-1 col-xs-11">Hello, User<h5>
-		<div id="times" class="col-xs-12">
-			<!--<hr class="next" width="75%">-->
+		<div id="times" class="col-xs-12 line">
+			<img src="Helper/Images/ring-alt.gif" class="loading">
+			<h5 class="text-center">Finding information</h5>
 		</div>
 		<hr class="next">
 
@@ -426,19 +475,9 @@
 		</div>
 
 		<div class="location" id="map">
-			hi
+			<img src="Helper/Images/ring-alt.gif" class="loading">
+			<h5 class="text-center">Waiting for location</h5>
 		</div>
-		<script async="false">
-			//script here due to page loading
-			showLocation(); //does not need other methods
-			startMap();
-			initPage("map"); //needs updated location, but not required
-			displayCookie(); //does not need other methods
-		  	updateWhenReady();
-		  	setUserCookie("random", "random");
-		  	var cook = getUserCookie("random");
-		  	console.log(cook);
-		 </script>
 		
 		<hr width="75%" class="next">
 		
