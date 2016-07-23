@@ -1,5 +1,6 @@
 import json
 import urllib
+import random
 
 def get(starting_lat, starting_lon, ending_lat, ending_lon):
     fh = urllib.urlopen("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s,%s&destinations=%s,%s&units=imperial&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0"
@@ -25,6 +26,14 @@ def coord_to_name(lat, lon):
     name = load["results"][0]["formatted_address"]
     return name
  #format_name(name)
+ 
+def generate_code(numbers):
+    total = int(random.uniform(1, 10))
+    for h in range(1, numbers):
+        num = int(random.random() * 10)
+        total *= 10
+        total += num
+    return total
     
 def format_name(name):
     index = name.find(",")

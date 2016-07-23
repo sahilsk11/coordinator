@@ -15,20 +15,29 @@
 		var new_user;
 		var my_data = ""; //json
 		var num_users; //number of users
+		var code;
 
 		//Username is null
 		if (getUserCookie("name") == "" || getUserCookie("name") == null) {
 			window.location = "createuser.html";
 		}
 
-		function showuser() {
-			document.getElementById("userform").innerHTML = "\
-			<div class='form-group'>\
-				<label class='control-label'>New Username:</label>\
-					<input id='input_user' class='form-control' value="+getUserCookie('name')+">\
-					<br>\
-					<button type='button' onClick='saveUser()' class='btn btn-default'>Submit</button>\
-				</div>";
+		function setCode() {
+			var url = window.location.toString();
+			var start = url.indexOf("=");
+			var end = url.indexOf("#");
+			console.log(start);
+			if (end == -1) {
+				var code = url.substring(start+1);
+			}
+			else {
+				var code = url.substring(start+1, end)
+			}
+			console.log(code);
+		}
+
+		function showUser() {
+			document.getElementById("input_user").value = getUserCookie("name");
 		}
 
 		function invalidName() {
@@ -74,7 +83,7 @@
 		function displaySuccess() {
 			document.getElementById("new").innerHTML = "<hr width='90%' class='next'>\
 					    <h2 class='text-center'>Your new username is " + new_user +  ".</h2>\
-						<h2 class='text-center'><a href='event.html'>Click here to go back to the main page.</a></h2>";
+						<h2 class='text-center'><a href='event.html?event='" + code + ">Click here to go back to the main page.</a></h2>";
 		}
 
 		function displayUsed() {
@@ -108,41 +117,51 @@
 	</script>
 </head>
 
-<body class="static-nav" onload="showuser()">
-	<nav class="navbar-inverse">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-		      		<span class="sr-only">Toggle navigation</span>
-		      		<span class="icon-bar"></span>
-		      		<span class="icon-bar"></span>
-		      		<span class="icon-bar"></span>
-	        	</button>
-    			<a href="index.html" class="navbar-brand">
-    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
-    			</a>
-			</div>
-    		<div id="navbar" class="navbar-collapse collapse">
-    			<ul class="nav navbar-nav theme">
-      				<li class=""><a href="index.html">Home</a></li>
-      				<li><a href="newevent.html">Create a New Event</a></li>
-      				<li class="active"><a href="changeuser.html">Change Username</a></li>
-      				<li><a href="https://www.iotspace.tech">Back to IoT Space</a></li>
-      				<li><a href="https://www.github.com/sahilsk11/coordinator" target="_blank">GitHub Page</a></li>
-    			</ul>
-    		</div>
- 		</div>
-	</nav>
+<body class="static-nav" onload="showUser()">
+		<nav class="navbar-inverse special-font mid-font nav-font">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+			      		<span class="sr-only">Toggle navigation</span>
+			      		<span class="icon-bar"></span>
+			      		<span class="icon-bar"></span>
+			      		<span class="icon-bar"></span>
+		        	</button>
+	    			<a href="index.html" class="navbar-brand">
+	    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
+	    			</a>
+				</div>
+	    		<div id="navbar" class="navbar-collapse collapse">
+	    			<ul class="nav navbar-nav theme">
+	      				<li class=""><a href="index.html">Home</a></li>
+	      				<li class="active"><a href="newevent.html">Create a New Event</a></li>
+	      				<li id="inuser" class="dropdown">
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+							<ul class="dropdown-menu">
+				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
+				          	</ul>
+				        </li>
+				        <li class="dropdown">
+				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Event <span class="caret"></span></a>
+				        	<ul id="indestination" class="dropdown-menu">
+				        		<li><a href="#">You are not in an event<br>Please join an even to go to your event.</a></li>
+				        	</ul>
+				        </li>
+	      				<li><a href="#">GitHub Page</a></li>
+	    			</ul>
+	    		</div>
+	 		</div>
+		</nav>
 	<div class="text-center">
 		<img src="Helper/Images/co.png" class="page-logo">
 		<hr width="65%" class="next-close">
 		<br>
 	</div>
 	<div class="col-xs-6">
-		<form id="userform" class="form-horizontal col-xs-11">
+		<form class="form-horizontal col-xs-11">
 	 		<div class="form-group">
 	    		<label class='control-label'>New Username:</label>
-	  			<input id="input_user" class='form-control'>
+	  			<input id="input_user" class='form-control' onkeydown="if (event.keyCode == 13) {saveUser();return false;}">
 	  			</input>
 	  			<br>
 	  			<button type='button' onClick='saveUser()' class='btn btn-default'>Submit</button>

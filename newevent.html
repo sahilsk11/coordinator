@@ -13,56 +13,157 @@
 		<script src="Helper/bootstrap.js" type="text/javascript"></script>
 		<script src="Helper/cookiesk.js"></script>
 		<script src="Helper/XHRequest.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0"></script>
+		<link href="https://fonts.googleapis.com/css?family=Droid+Sans|PT+Sans" rel="stylesheet">
 		<script>
 
-			function setDestination() {
-			//generate url
-				var destination = document.getElementById("destination").value;
-				if (valid(destination)) {
-					set(destination);
-					var URL = "www.iotspace.tech/coordinator/event.html";
+
+			var url;
+			var my_data;
+			var elat;
+			var elon;
+			var destination;
+			var firstclick = true;
+			var useragent = navigator.userAgent;
+			var code;
+            var auto_complete;
+            var plat;
+            var plon;
+
+			/*
+			function showLocation () {
+				console.log("Starting location");
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(showPosition);
+					console.log("starting showPosition");
+				}
+				else {
+					console.log("Retrieve stopped");
+
 				}
 			}
 
-			var my_data;
+			function showPosition(position) {
+				console.log("setting coordinates");
+				var lat = position.coords.latitude.toString();
+				var lon = position.coords.longitude.toString();
+				document.getElementById("autofill").src = "https://maps.googleapis.\
+				com/maps/api/js?libraries=places&location="+lat+","+lon+"&key=\
+				AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0";
+				console.log("URL update with location");
+			}
+			*/
 
-			function set(destination){
+			google.maps.event.addDomListener(window, 'load', autocompleteHelper);
+
+			function autocompleteHelper() {
+   				var input = document.getElementById('searchTextField');
+    			var options = {componentRestrictions: {country: 'us'}};
+    			auto_complete = new google.maps.places.Autocomplete(input, options);
+    			//console.log(something.getPlace());
+    			//something.getPlace().geometry.location;
+			}
+             
+
+			function buttonClick() {
+			//generate url
+				if (auto_complete == undefined) {
+					displayError();
+				}
+				else {
+				    elat = auto_complete.getPlace().geometry.location.lat();
+	    			elon = auto_complete.getPlace().geometry.location.lng();
+	    			
+					destination = document.getElementById("searchTextField").value;
+					if (destinationValid()) {
+						askIfSure();
+					}
+				}
+			}
+
+			function resetElements() {
+				document.getElementById("map").innerHTML = "";
+				document.getElementById("url").innerHTML = "";
+				document.getElementById("response") = "";
+			}
+
+			function formatDestination(dest) {
+				var formatted_destination = "";
+				for (var i = 0; i < dest.length; i+=1) {
+					if (dest.substring(i, i+1) == " ") {
+						formatted_destination += "+";
+					}
+					else {
+						formatted_destination += dest.substring(i, i+1);
+					}
+				}
+				return formatted_destination;	
+			}
+
+			function askIfSure() {
+					var formatted_destination = formatDestination(destination);
+					setMap(formatted_destination);
+					document.getElementById("hr").innerHTML = "<hr class='next'>";
+					document.getElementById("url").innerHTML = "<h3 class='text-center destination-padding title-font'>Your new destination is " + destination + ".</h3> <button class='center btn btn-primary' onclick='setNewEvent();setButtonState();'>Click here to confirm</button><br>";
+			}
+
+			function setNewEvent() {
 				XHRequest.createRequest({
-					success: test_valid, 
+					success: processEvent, 
 					method: "GET",
 					params: {
-						command: "change_destination",
-						destination: destination
+						command: "new_event",
+						destination: destination,
+						lat: elat,
+						lon: elon
 					},
 					url: "/coordinator/scripts/datbase.py"
 				});
-			}
 
-			function test_valid(xhr, xhrconfig) {
-				my_data = JSON.parse(xhr.responseText);
-				var valid = my_data.complete;
-				var name = my_data.name;
-				if (valid == "True") {
-					set_map(name);
-					document.getElementById("url").innerHTML = "<hr class='next'><h3 class='text-center'>Your new destination is " + name + ".<br><a href='event.html'>Click here to go back to the main page</a></h3>";
+				function processEvent(xhr, xhrconfig) {
+					my_data = JSON.parse(xhr.responseText);
+					var valid = my_data.complete;
+					var name = my_data.name;
+					code = my_data.code;
+					console.log(code);
+					document.getElementById("url").innerHTML = "";
+					url = "https://iotspace.tech/coordinator/event.html?event=" + code;
+					if (valid == "True") {
+						displayUrl(url);
+						document.getElementById("change_page").innerHTML = "<button onclick='changePage()' class='btn btn-primary center'>Click here to go to your event.</button>";
+					}
 				}
 			}
 
-			function display_url(url) {
-				document.getElementById("url").innerHTML = "\
-					<div class='col-xs-12'>\
-						<form class='form-horizontal'>\
-							<div class='form-group col-xs-12'>\
-								<label class='control-label col-xs-12'>Your Custom URL:</label>\
-								<input class='form-control' onClick='this.select()' readonly value=" + url + ">\
-							</div>\
-						</form>\
-					</div>";
+			function changePage() {
+				window.location = "event.html?event=" + code;
 			}
 
-			function valid(destination) {
-				if (destination.length < 2 || !valid_location(destination)) {
-					document.getElementById("url").innerHTML="<h1 class='text-center'>Destination is not valid.</h1>"
+			function setButtonState() {
+				document.getElementById("submit").disabled = "disabled";
+			}
+
+			function displayUrl(url) {
+				document.getElementById("url").innerHTML = "\
+						<form class='form-padding form-horizontal'>\
+							<div class='form-group' id='eventpage'>\
+								<label class='control-label text-center'>Your Custom URL:</label>\
+								<input class='form-control' id='newurl' onClick='this.select()' value=" + url + " readonly>\
+							</div>\
+						</form>";
+				if (useragent.indexOf("iPad") >= 0 || useragent.indexOf("iPhone") >= 0) {
+					document.getElementById("eventpage").innerHTML = "<label class='control-label'>Your Custom URL:</label>\
+								<input class='form-control' id='newurl' onclick='this.select()' value=" + url + ">";
+				}
+			}
+
+			function displayError() {
+				document.getElementById("url").innerHTML="<h1 class='text-center'>Destination is not valid.</h1>";
+			}
+
+			function destinationValid() {
+				if (destination.length < 2) {
+					displayError();
 					return false;
 				}
 				else {
@@ -70,22 +171,57 @@
 				}
 			}
 
-			function valid_location(destination) {
-				return true;
+			function setMap(dest) {
+				console.log(dest);
+				document.getElementById("map").src = "https://www.google.com/maps/embed/v1/place?q=" + dest+ "&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0";
+				//display_url(url);
 			}
 
-			var url;
-			function set_map(destination) {
-				destination = destination.replace(/\s/g, "+");
-				 url = "https://maps.googleapis.com/maps/api/staticmap?center="+destination+"&zoom=9&size=999x300&markers=|"+destination+"&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0";
-				 console.log(url);
-				document.getElementById("map").innerHTML = "<img class='static-location' src="+url+">";
+			function enterSubmit() {
+				var device = false;
+				if (useragent.indexOf('iPhone') >= 0 || useragent.indexOf('iPad') >= 0 || useragent.indexOf('Android') >= 0) {
+					device = true;
+				}
+				if (! firstclick || device) {
+					buttonClick();
+				}
+				else {
+					firstclick = false;
+				}
 			}
+
+			//starts location
+			//related: showPosition
+			function showLocation () {
+				console.log("Starting location");
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(showPosition);
+				}
+			}
+			
+			//sets lat and lon, and initializes map marker for location
+			//related: showLocation
+			function showPosition(position) {
+				plat = position.coords.latitude;
+				plon = position.coords.longitude;
+				document.getElementById("searchTextField").value = plat + ", " + plon;
+				document.getElementById("url").innerHTML = "";
+				autocompleteHelper();
+				buttonClick();
+			}
+
+
+			function setCurrent() {
+				showLocation();
+				document.getElementById("url").innerHTML = "<img src='Helper/Images/pie.gif' class='loading'>\
+			<h5 class='text-center'>Waiting for location</h5>";
+			}
+
 		</script>
 	</head>
 
 	<body class="static-nav">
-		<nav class="navbar-inverse">
+		<nav class="navbar-inverse special-font mid-font nav-font">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -102,36 +238,51 @@
 	    			<ul class="nav navbar-nav theme">
 	      				<li class=""><a href="index.html">Home</a></li>
 	      				<li class="active"><a href="newevent.html">Create a New Event</a></li>
-	      				<li><a href="changeuser.html">Change Username</a></li>
-	      				<li><a href="changedestination.html">Change Destination</a></li>
-	      				<li><a href="www.iotspace.tech">Back to IoT Space</a></li>
+	      				<li id="inuser" class="dropdown">
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+							<ul class="dropdown-menu">
+				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
+				          	</ul>
+				        </li>
+				        <li class="dropdown">
+				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Event <span class="caret"></span></a>
+				        	<ul id="indestination" class="dropdown-menu">
+				        		<li><a href="#">You are not in an event<br>Please join an event to go to your event.</a></li>
+				        	</ul>
+				        </li>
+	      				<li><a href="#">GitHub Page</a></li>
 	    			</ul>
 	    		</div>
 	 		</div>
 		</nav>
 		<div class="text-center">
-			<img src="Helper/Images/co.png" class="page-logo">
-			<hr width="65%" class="next-close">
+			<img src="Helper/Images/co.png" class="page-logo" alt="Coordinator">
+			<hr width="55%" class="next-close">
 			<br>
 		</div>
 		<br>
-		<div class="col-xs-6">
+		<span class="col-xs-6 mid-font">
 			<form class="form-horizontal col-xs-11">
 		 		<div class="form-group">
-		    		<label class="control-label">Destination:</label>
-		  			<input id="destination" class="form-control" placeholder="Destination">
+		    		<label for="searchTextField" class="control-label">Destination:</label>
+		  			<input id="searchTextField" class="form-control" placeholder="Destination" onkeydown="if (event.keyCode == 13) {enterSubmit();return false;}">
 		  			<br>
-		  			<button type="button" onclick="setDestination()" class="btn btn-default">Submit</button>
+		  			<a href="#map"><button type="button" id="submit" onclick="buttonClick()" class="btn btn-default">Submit</button></a><br>
+		  			<br>
 		  		</div>
 			</form>
-		</div>
-
-		<div id="url"></div>
-		<div class="col-xs-12">
-			<h5>Remember, the event will be valid for 24 hours before being deleted. This URL is the only way to access your event, so keep it secure.</h5>
-		</div>
-		<div id="map" class="location">
-		</div>
+		</span>
+		<span class="col-xs-6">
+			<h2 class="text-center">To set a destination, click on one of the suggested addresses from the list as you type.</h2>
+		</span>
+		<button class="btn btn-default" onclick="setCurrent()">Set Current Location as Destination</button>
+		<div id="hr"></div>
+		<div id="url" class="center"></div>
+		<div id="change_page"></div>
+		<br>
+		<iframe id="map" width="100%" height="400" frameborder="0">
+  		</iframe>
+  		
 	</body>
 </html>
 

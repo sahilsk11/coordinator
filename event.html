@@ -13,8 +13,9 @@
     		</script>
     	<script src="Helper/cookiesk.js"></script>
     	<script src="Helper/XHRequest.js"></script>
+    	<script src = "Helper/fingerprint.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Oxygen|PT+Sans" rel="stylesheet">
     	<script>
-
 
     		//if (getUserCookie("valid_user") != "true") {
 	    	//	if (prompt("Enter password") != "2357") {
@@ -24,22 +25,29 @@
 	    	//		setUserCookie("valid_user", "true")
 	    	//	}
 	    	//}
-    		var users;
+
     		var my_data = "";
     		var map;
-			var destination = {lat: 37, lng:-100};
-			var position_set = false;
+			var destination;
+			var dest_name;
+			var location_set = false;
 			var plat = "";
 			var plon = "";
 			var exit_code;
 			var markers = [];
 			var initial_start = true;
+		  	var original_button;
+		  	var destination_icon;
+		  	var code;
+		  	var keep_user;
+		  	var user_id;
 
 			//deletes event
 			//related: none
     		function deleteT() {
     			var step = confirm("You are deleting the event.");
     			if (step == true) {
+    				setUserCookie(code, "");
 	    			function success1() {
 
 	    			}
@@ -47,57 +55,112 @@
 	    				success: success1, 
 	    				url: "/coordinator/scripts/datbase.py",
 	    				params: {
-	    					command: "delete"
+	    					command: "delete",
+	    					code: code
 	    				}
 	    			});
 	    		}
     		}
 
+    		function setUserId() {
+    			user_id = new Fingerprint({canvas: true}).get();
+    		}
+
+    		function setCode() {
+    			var url = window.location.toString();
+    			var start = url.indexOf("=");
+    			var end = url.indexOf("#");
+    			if (start < 0) {
+    				window.location = "newevent.html";
+    			}
+    			if (end == -1 || end < start) {
+    				code = url.substring(start+1);
+    			}
+    			else {
+    				code = url.substring(start+1, end)
+    			}
+    			console.log(code);
+    			code_set = true;
+    			validateCodeRequest();
+    		}
+
+    		function setCodesOnLinks() {
+    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>User Settings</a></li>";
+    			document.getElementById("indestination").innerHTML = "<li><a href='changedestination.html?event="+code+"'>Change Destination</a></li>\
+    			<li class='active'><a href='event.html?event=" + code + "'>Go to event</a></li><li><a href='https://maps.google.com?saddr=Current+Location&daddr=" + my_data.destination.lat + "," + my_data.destination.lon+ "' target='_blank'>Start Navigation</a></li>";
+    			document.getElementById("indestination2").href = "https://maps.google.com?saddr=Current+Location&daddr=" + my_data.destination.lat + "," + my_data.destination.lon;
+    			document.getElementById("indestination2").target = "_blank";
+    		}
+
+    		function validateCodeRequest() {
+				XHRequest.createRequest({
+					success: processValidateCode, 
+					method: "GET",
+					params: {
+						command: "check_event_code",
+						code: code,
+					},
+					url: "/coordinator/scripts/datbase.py"
+				});
+			}
+
+			function processValidateCode(xhr, xhrConfig) {
+				var data = JSON.parse(xhr.responseText);
+				if (data.valid == "false") {
+					displayEventError();
+					window.location = "newevent.html";
+				}
+			}
+
+			function displayEventError() {
+
+			}
+
     		//updates the current user with lat and lon
     		//precondition: location set
     		//related : none
-    		function update() {
-    			console.log("updating");
-				var user;
-				user = getUserCookie("name");
-    			function interpret(xhr, xhrConfig) {
-    				var data = JSON.parse(xhr.responseText);
-    				console.log("updated");
-    				if (data.complete == "Location") {
-    					//location invalid
-    				}
-    				else if (data.complete == "True") {
-    					if (initial == true) {
-    						initial = false;
-    						console.log("first init");
-    						initPage("map"); //init called within update
-    					}
-    					else {
-    						initPage("");
-    					}
-    				}
-    				else {
-    					window.location = "newevent.html";
-    				}
+    		function updateRequest() {
+    			if (location_set == false) {
+    				return;
     			}
+    			var user_name = getUserCookie(code);
     			XHRequest.createRequest({
-					success: interpret, 
-					url: "/coordinator/scripts/datbase.py",
+					success: processUpdate, 
 					params: {
-						command: "update",
+						command: "update_user",
 						lat: plat,
 						lon: plon,
-						user: getUserCookie("name")
-					}
+						user: user_name,
+						code: code
+					},
+					url: "/coordinator/scripts/datbase.py"
     			});
+    		}
+
+    		function processUpdate(xhr, xhrConfig) {
+    			console.log("updating");
+				var data = JSON.parse(xhr.responseText);
+				console.log("updated");
+				if (data.complete == "Location") {
+					//location invalid
+				}
+				else if (data.complete == "True") {
+					initPage(); //init called within update
+				}
+				else if (data.complete == "User") {
+					window.location = "createuser.html?event="+ code;
+				}
+				else {
+					window.location = "newevent.html";
+				} 	
     		}
 
     		//sets width of elements depending on how many there are
     		//related: showUsers
     		function setWidth(number) {
 				var length = 12/number;
-				if (length < 2) {
-					length = 2;
+				if (length < 3) {
+					length = 3;
 				}
 				return length;
 			}
@@ -106,94 +169,72 @@
     		//precondition: users is done, my_data complete
     		//related: check, success, setWidth
     		function showUsers() {
-    			var titles = "";
-    			for (var i = 0; i < users; i++) {
-    				titles = titles + "<h3 class='text-center col-md-"+setWidth(users)+"'>" + my_data.people[i].name + "\'s time from destination: " + my_data.people[i].time + "</h3>";
+    			var times = "<table class='usertable larger-font'>\
+								<tr class='bottom-line'>\
+									<th class='cell'>User</th>\
+									<th class='right cell'>Time From Destination</th>\
+								</tr>";
+    			var length = my_data.people.length;
+    			for (var i = 0; i < length; i++) {
+    				var user_found = "";
+    				if (my_data.people[i].name == getUserCookie(code)) {
+    					user_found = " (you)"
+    				}
+    				times = times + "<tr><td class='cell'>" + my_data.people[i].name + user_found + "</th><td class='right cell'>" + my_data.people[i].time + "</td></tr>";
     			}
-    			document.getElementById("times").innerHTML = titles;
+    			times += "</table>";
+    			document.getElementById("user_information").innerHTML = times;
+    		}
+
+    		function initPage() {
+    			document.getElementById("user_information").innerHTML = "<img src='Helper/Images/pie.gif' class='loading'>\
+					<h5 class='text-center'>Searching for users</h5>";
+    			my_data = "";
+    			XHRequest.createRequest({
+					success: setPage, 
+					url: "/coordinator/scripts/datbase.py",
+					params: {
+						command: "show",
+						code: code
+					}
+    			});
     		}
 
     		//success when "show" is called also displays interprets data and redirects
     		//related: check, showUsers
-    		function success(xhr, xhrConfig) {
+    		function setPage(xhr, xhrConfig) {
     			console.log("looking");
     			my_data = JSON.parse(xhr.responseText);
-    			users = my_data.users;
+    			if (my_data.hasOwnProperty("valid")) {
+    				window.location = "newevent.html"
+    			}
     			var user_valid = false;
-    			for (var i = 0; i < users; i++) {
-    				if (my_data.people[i].name == getUserCookie("name")) {
+    			var length = my_data.people.length;
+    			for (var i = 0; i < length; i++) {
+    				if (my_data.people[i].name == getUserCookie(code)) {
     					user_valid = true;
     				}
     			}
-    			console.log(user_valid);
-    			if (user_valid == false) {
-    				setUserCookie("name", "");
-    				if (my_data.destination.set == "no") {
-    					window.location = "newevent.html";
-    				}
-    				else {
-    					window.location = "createuser.html";
-    				}
+    			if (user_valid == false && keep_user == false) { //user not found
+    				setUserCookie(code, "");
+					window.location = "createuser.html?event="+code;
     			}
-    			else {
-					showUsers(); //called showUsers
+    			else { //user found
+					showUsers();
 					destination = {lat: my_data.destination.lat, lng: my_data.destination.lon};
-					if (initial_start) {
+					dest_name = my_data.destination.name;
+					if (initial_start) { //load map if starting for the first time
 						initial_start = false;
 						startMap();
 					}
+					else {
+						document.getElementById("refresh").disabled = ""; //allow user to refresh button
+					}
 					showDestination();
 					showAl();
+	    			setCodesOnLinks();
     			}
     		
-    		}
-
-    		//retrieves information and calls others to use it
-    		//related: success, showUsers
-    		function initPage() {
-    			document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
-					<h5 class='text-center'>Searching for users</h5>";
-    			my_data = "";
-    			users = null;
-    			markers = [];
-    			if (methods == "map"){
-	    			XHRequest.createRequest({
-						success: success, 
-						url: "/coordinator/scripts/datbase.py",
-						params: {
-							command: "show"
-						}
-	    			});
-	    		}
-	    		else {
-	    			XHRequest.createRequest({
-						success: successRefresh, 
-						url: "/coordinator/scripts/datbase.py",
-						params: {
-							command: "show"
-						}
-	    			});
-	    		}
-    		}
-
-    		function successRefresh(xhr, xhrConfig) {
-    			my_data = JSON.parse(xhr.responseText);
-    			users = my_data.users;
-    			var found = false;
-    			for (var i = 0; i < users; i++) {
-    				if (my_data.people[i].name == getUserCookie("name")) {
-    					found = true;
-    					showUsers(); //called showUsers
-    					destination = {lat: my_data.destination.lat, lng: my_data.destination.lon};
-    					showDestination();
-    					showAl();
-    				}
-    			}
-
-    			if (found == false) {
-    				setUserCookie("name", "");
-    				window.location = "createuser.html";
-    			}
     		}
 
     		//detects browser and makes mobile site
@@ -204,52 +245,17 @@
 				if (useragent.indexOf('iPhone') == -1 && useragent.indexOf('Android') == -1 ) {
 			    	mapdiv.style.width = '100%';
 			    	mapdiv.style.height = '50%';
-			    	document.getElementById("show_map_button").innerHTML = "";
+			    	//document.getElementById("show_map_button").innerHTML = "";
 			    	document.getElementById("lead_image").innerHTML = "<img src='Helper/Images/co.png' alt='Coordinator' class='page-logo'>\
-						<hr width='65%' class='next-close'>";
-			  	}
-			  	else {
-			  		function jump(controlDiv, map) {
-						var controlUI = document.createElement('div');
-				        controlUI.style.backgroundColor = '#fff';
-				        controlUI.style.border = '2px solid #fff';
-				        controlUI.style.borderRadius = '3px';
-				        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-				        controlUI.style.cursor = 'pointer';
-				        controlUI.style.marginBottom = '22px';
-				        controlUI.style.textAlign = 'center';
-				        controlUI.title = 'Click to recenter the map';
-				        controlDiv.appendChild(controlUI);
-				        var controlText = document.createElement('div');
-				        controlText.style.color = 'rgb(25,25,25)';
-				        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-				        controlText.style.fontSize = '16px';
-				        controlText.style.lineHeight = '38px';
-				        controlText.style.paddingLeft = '5px';
-				        controlText.style.paddingRight = '5px';
-				        controlText.innerHTML = 'Jump to Top';
-				        controlUI.appendChild(controlText);
-		        		controlUI.addEventListener('click', function() {
-	          			window.location = "event.html#top";
-	        			});
-					}
-			  		var jumpDiv = document.createElement('div');
-		        	var centerControl = new jump(jumpDiv, map);
-		        	jumpDiv.index = 1;
-		        	map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(jumpDiv);
+						<hr width='55%' class='next-close'>";
 			  	}
 			}
 			//greets user with cookie
 			//related: none
 			function displayCookie() {
-				var user = getUserCookie("name");
-				if (user != null) {
-					console.log("user="+user);
-					document.getElementById("user").innerHTML = "You are: " + user;
-				}
-				else {
-					//window.location = "createuser.html";
-				}
+				var user = getUserCookie(code);
+				console.log("user="+user);
+				document.getElementById("user").innerHTML = "You are: " + user;
 			}
 
 			//starts location
@@ -266,7 +272,7 @@
 			function showPosition(position) {
 				plat = position.coords.latitude;
 				plon = position.coords.longitude;
-				position_set = true;
+				location_set = true;
 			}
 
 			//sets the map
@@ -283,7 +289,7 @@
 			//creates marker for destination
 			//related: none
 			function showDestination() {
-			  	var destination_icon = new google.maps.Marker({
+			  	destination_icon = new google.maps.Marker({
 			  		position: destination,
 			  		icon: {
 	      				path: google.maps.SymbolPath.CIRCLE,
@@ -292,63 +298,22 @@
 			  		map: map,
 			  		title: 'Destination'
 			  	});
+			  	destination_icon.infoWin = new google.maps.InfoWindow({
+          			content: dest_name
+    			});
+			  	destination_icon.addListener('click', function() {
+			  		for (var i = 0; i < markers.length; i+=1) {
+      					markers[i].infoWin.close(map, markers[i]);
+      				}
+      				destination_icon.infoWin.open(map, destination_icon);
+      			});
+      			destination_icon.addListener('mouseover', function() {
+      				destination_icon.infoWin.open(map, destination_icon);
+      			});
+      			destination_icon.addListener('mouseout', function() {
+      				this.infoWin.close(map, destination_icon);
+      			});
 		  	}
-
-		  	function UpdateHelper() {
-		  		if (position_set == true) {
-		  			console.log("stop refresh");
-		  			window.clearInterval(exit_code);
-		  			update();
-		  		}
-		  	}
-
-		  	function updateWhenReady() {
-		  		document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
-					<h5 class='text-center'>Finding information</h5>";
-				plat = "";
-				plat = "";
-				position_set = false;
-				showLocation();
-		  		if (position_set == false) {
-		  			document.getElementById("times").innerHTML = "<img src='Helper/Images/ring-alt.gif' class='loading'>\
-						<h5 class='text-center'>Updating Location</h5>";
-		  			exit_code = window.setInterval(UpdateHelper, 5000);
-		  			console.log(exit_code);
-		  		}
-		  		else {
-		  			update();
-		  		}
-		  	}
-
-		  	/*
-		  	function showAll() {
-		  		var lat;
-		  		var lon;
-		  		var username;
-		  		for (var u = 0; u < markers.length; u+=1) {
-		  			markers[u].setMap(null);
-		  		}
-		  		markers = [];
-		  		for (var i = 0; i < users; i++) {
-		  			console.log(i);
-		  			username = my_data.people[i].name;
-		  			lat = my_data.people[i].lat;
-		  			lon = my_data.people[i].lon;
-		  			var marker = {
-			  			position: {lat: lat, lng:lon},
-			  			map: map,
-			  			title: username+'\'s position',
-			  			label: username.substring(0,1)
-		  			};
-		  			eval(username+"_marker= null");
-		  			eval(username+"_marker= new google.maps.Marker(marker)");
-		  			markers.push(eval(username+"_marker"));
-		  			for (var u = 0; u < markers.length; u+=1) {
-		  				console.log(markers[u]);
-		  			}
-		  		}
-		  	}
-		  	*/
 
 		  	function showAl() {
 		  		var lat;
@@ -358,58 +323,114 @@
 		  			markers[y].setMap(null);
 		  		}
 		  		markers = [];
-		  		for (var y = 0; y < users; y+=1) {
+		  		//alert("is all clear");
+		  		for (var y = 0; y < my_data.people.length; y+=1) {
 		  			lat = my_data.people[y].lat;
 		  			lon = my_data.people[y].lon;
+		  			username = my_data.people[y].name;
+		  			var first_letter = username.substring(0, 1).toUpperCase();
 		  			var marker = new google.maps.Marker({
 		  				position: {lat: lat, lng: lon},
-		  				map: map
+		  				map: map,
+		  				label: first_letter
 		  			});
-		  			markers.push(marker);
+		  			if (username == getUserCookie(code)) {
+		  					username += " (you)";
+		  				}
+		  			marker.infoWin = new google.maps.InfoWindow({
+          				content: username
+        			});
+        			markers.push(marker);
+        			var len = markers.length;
+		  			markers[markers.length - 1].addListener('click', function() {
+          				for (var i = 0; i < markers.length; i+=1) {
+          					markers[i].infoWin.close(map, markers[i]);
+          				}
+          				destination_icon.infoWin.close(map, destination_icon);
+          				this.infoWin.open(map, this);
+          			});
+          			markers[markers.length - 1].addListener('mouseover', function() {
+          				this.infoWin.open(map, this);
+          			});
+          			markers[markers.length - 1].addListener('mouseout', function() {
+          				this.infoWin.close(map, this);
+          			});
 		  		}
 		  	}
 
-		  	function toggleAction() {
-		  		var original = document.getElementById("action").innerHTML;
-		  		if (original == "") {
-		  			document.getElementById("action").innerHTML = "\
-					<div class='action'>\
-						<a class='custom-btn' href='#map' id='show_map_button'><button class='btn btn-default btn-sm'>Scroll to Map</button>\
-						</a>\
-						<a class='custom-btn' href='http://maps.google.com/?daddr=37.321463,-121.947924' target='_blank' ><button id='start_directions'\
-							class='btn btn-default btn-sm'>Start Directions</button>\
-						</a>\
-						<a class='custom-btn' href='changeuser.html'><button id='change_username'\
-							class='btn btn-default btn-sm'>Change Name</button>\
-						</a>\
-						<a class='custom-btn' href='changedestination.html'><button id='change_destination' class='btn btn-default btn-sm'>Change Destination</button></a>\
-						<a class='custom-btn'><button class='btn btn-default btn-sm' onclick = 'deleteT()'>Del</button></a>\
-						<a class='custom-btn'><button class='btn btn-default btn-sm' onclick='updateWhenReady()'>Refresh</button></a>\
-					</div>";
-					return true;
+		  	function intelligentlyAddPrevious() {
+				XHRequest.createRequest({
+					success: intelligentGuess, 
+					method: "GET",
+					params: {
+						command: "show",
+						code: code
+					},
+					url: "/coordinator/scripts/datbase.py"
+				});
+			}
+
+			function intelligentGuess(xhr, xhrConfig) {
+				var data = JSON.parse(xhr.responseText);
+				if (data.uids.hasOwnProperty(user_id)) {
+					setUserCookie(code, data.uids[user_id]);
+					keep_user = true;
+				}
+				else {
+					if (getUserCookie(code) == null || getUserCookie(code) == undefined || getUserCookie(code).length <= 1) {
+						window.location = "createuser.html?event=" + code;
+					}
+					keep_user = false;
+				}
+			}
+
+		  	function UpdateHelper() {
+		  		if (location_set == true) {
+		  			console.log(exit_code);
+		  			window.clearInterval(exit_code);
+		  			updateRequest();
 		  		}
 		  		else {
-		  			document.getElementById("action").innerHTML = "";
-		  			return false;
+		  			console.log("Waiting for location");
 		  		}
+		  	}
+
+		  	function updateWhenReady() {
+		  		document.getElementById("refresh").disabled = "disabled";
+		  		document.getElementById("user_information").innerHTML = "<img src='Helper/Images/pie.gif' class='loading'>\
+					<h5 class='text-center'>Finding information</h5>";
+				plat = "";
+				plat = "";
+				location_set = false;
+				showLocation();
+				exit_code = window.setInterval(UpdateHelper, 1000);
+				console.log(exit_code);
+		  	}
+
+		  	function scrollToMap() {
+		  		window.location = "#map";
+		  	}
+
+		  	function startRefresh() {
+				window.setInterval(UpdateHelper, 120000);
 		  	}
 
 		  	function start() {
-		  		showLocation(); //does not need other methods
-				displayCookie(); //does not need other methods
+		  		setCode();
+		  		setUserId();
+		  		intelligentlyAddPrevious();
+				initPage();
+		  		showLocation(); //does not need other methods, calls its own methods
+				startRefresh();
 		  		updateWhenReady();
 		  	}
 
-			window.setInterval(function(){
-		  		updateWhenReady();
-			}, 120000);
-
-    		
     	</script>
 	</head>
 	<body class="static-nav" onload="start()">
+
 		<a id="top"></a>
-		<nav class="navbar-inverse">
+		<nav class="navbar-inverse special-font mid-font nav-font">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -426,9 +447,19 @@
 	    			<ul class="nav navbar-nav theme">
 	      				<li class=""><a href="index.html">Home</a></li>
 	      				<li class="active"><a href="newevent.html">Create a New Event</a></li>
-	      				<li><a href="changeuser.html">Change Username</a></li>
-	      				<li><a href="www.iotspace.tech">Back to IoT Space</a></li>
-	      				<li><a href="https://www.github.com/sahilsk11/coordinator" target="_blank">GitHub Page</a></li>
+	      				<li id="inuser" class="dropdown">
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+							<ul class="dropdown-menu">
+				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
+				          	</ul>
+				        </li>
+				        <li class="dropdown">
+				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Event <span class="caret"></span></a>
+				        	<ul id="indestination" class="dropdown-menu">
+				        		<li><a href="#">You are not in an event<br>Please join an even to go to your event.</a></li>
+				        	</ul>
+				        </li>
+	      				<li><a href="#">GitHub Page</a></li>
 	    			</ul>
 	    		</div>
 	 		</div>
@@ -441,46 +472,26 @@
 			<iframe width="100%" height="80%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJEf1nWlY0joARpclcbmlnKdU&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0" allowfullscreen
 			</iframe
 		</div> -->
-		<h5 id="user" class="col-offset-xs-1 col-xs-11">Hello, User<h5>
-		<div id="times" class="col-xs-12 line">
-			<img src="Helper/Images/ring-alt.gif" class="loading">
+
+		<div id="user_information" class="user-format">
+			<br>
+			<img src="Helper/Images/pie.gif" class="loading">
 			<h5 class="text-center">Finding information</h5>
 		</div>
+
 		<hr class="next">
 
-		<button class="btn btn-default btn-sm" onclick="if(toggleAction()==true){this.innerHTML='Hide Actions';}else{this.innerHTML='Show Actions:'}">Hide Actions:</button>
-
-		<div class="header" id="action">
-			<div class="action">
-				<a class="custom-btn" href='#map' id="show_map_button"><button class="btn btn-default btn-sm">Scroll to map</button>
-				</a>
-
-				<a class="custom-btn" href="http://maps.google.com/?daddr=37.321463,-121.947924" target="_blank" ><button id="start_directions" 
-					class="btn btn-default btn-sm">Start Directions</button>
-				</a>
-
-				<a class="custom-btn" href="changeuser.html"><button id="change_username"
-					class="btn btn-default btn-sm">Change Name</button>
-				</a>
-
-				<a class="custom-btn" href="changedestination.html"><button id="change_destination" class="btn btn-default btn-sm">Change Destination</button></a>
-
-				<a class="custom-btn"><button class="btn btn-default btn-sm" onclick = "deleteT()">Del</button></a>
-
-				<a class="custom-btn"><button class="btn btn-default btn-sm" onclick="updateWhenReady()">Refresh</button></a>
-
-				
-
-			</div>
-		</div>
-
 		<div class="location" id="map">
-			<img src="Helper/Images/ring-alt.gif" class="loading">
+			<br>
+			<img src="Helper/Images/pie.gif" class="loading">
 			<h5 class="text-center">Waiting for location</h5>
 		</div>
-		
-		<hr width="75%" class="next">
-		
+
+		<div class="container-fluid center">
+			<span><a href="#" id="indestination2"><button class="custom-btn btn-default btn">Start Directions</button></a></span>
+			<span><button disabled="disabled" id="refresh" class="custom-btn btn-default btn" onclick="updateWhenReady()">Refresh</button></span>
+			<span><a href="#top"><button class="custom-btn btn-default btn">Back to top</button></a></span>
+		</div>
 
 
 		<!--script type="text/javascript"
@@ -489,6 +500,7 @@
 				var time = json.results[0]["rows"][0]["elements"][0]["duration"]["text"];
 			});
 		</script> -->
+
 	</body> 
 
 </html>
