@@ -7,8 +7,7 @@ import operations
 operations = operations.operations()
 
 operations.init("information.shelve")
-    
-print operations.convert_json("")
 
+print operations.convert_json("")
 
 operations.close()

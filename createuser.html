@@ -111,7 +111,7 @@
 			}
 
 			function setCodesOnLinks() {
-    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>User Settings</a></li>";
+    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>Change Username</a></li>";
     			document.getElementById("indestination").innerHTML = "<li class='active'><a href='changedestination.html?event="+code+"'>Change Destination</a></li>\
     			<li><a href='event.html?event=" + code + "'>Go to event</a></li>";
     		}
@@ -150,11 +150,11 @@
 
 			function textValid() {
 				var text = new_user;
-				if (text=="" || text.length <= 1) {
+				if (text=="" || text.length <= 1 || text.length >= 10) {
 			    	document.getElementById("action").innerHTML = "<hr width='90%' class='next'>\
 			    		<h2 class='text-center title-font'>Please Enter a Valid Username.</h2>\
 			    		<br><p class='text-center'>\
-			    		A valid username contains more than one character, has no spaces, and should provide description of who you are.\
+			    		A valid username contains more than one character, has no spaces, is less than 11 characters, and should provide description of who you are.\
 			    		</p>"
 			    	return false;
 				}
@@ -280,16 +280,16 @@
 			      		<span class="icon-bar"></span>
 			      		<span class="icon-bar"></span>
 		        	</button>
-	    			<a href="index.html" class="navbar-brand">
+	    			<a href="." class="navbar-brand">
 	    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
 	    			</a>
 				</div>
 	    		<div id="navbar" class="navbar-collapse collapse">
 	    			<ul class="nav navbar-nav theme">
-	      				<li class=""><a href="index.html">Home</a></li>
+	      				<li class=""><a href=".">Home</a></li>
 	      				<li><a href="newevent.html">Create a New Event</a></li>
 	      				<li id="inuser" class="active dropdown">
-	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Change Username</a>
 							<ul class="dropdown-menu">
 				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
 				          	</ul>

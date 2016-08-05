@@ -10,9 +10,7 @@ import datetime
 #cgitb.enable(display=0, logdir="/tmp/logfile")
 
 operations =  operations.operations()
-
 operations.init("information.shelve")
-
 form = cgi.FieldStorage()
 command = form.getfirst("command", "")
 new_user = form.getfirst("new_user", "")
@@ -25,6 +23,9 @@ code = form.getfirst("code", "")
 lat = form.getfirst("lat", "")
 lon = form.getfirst("lon", "")
 uid = form.getfirst("uid", "")
+elat = form.getfirst("elat", "")
+elon = form.getfirst("elon", "")
+
 
 if (lat != ""):
     lat = float(lat)
@@ -33,8 +34,14 @@ if (lon != ""):
     lon = float(lon)
 
 if (code != ""):
-    code = int(code)    
-
+    code = int(code)
+    
+if (elat != ""):
+    elat = float(elat)
+    
+if (elon != ""):
+    elon = float(elon)
+    
 if (command == 'change_user'):
     if (new_user == old_user):
         d = {"valid":"True"}
@@ -102,8 +109,9 @@ if (command == "check_event"):
     print j
     
 if (command == "new_event"):
-    valid = operations.new_event(destination, lat, lon)
+    valid = operations.new_event(destination, elat, elon)
     code = valid[1]
+    cmplt = operations.add_user(user, lat, lon, code, uid)
     d = {}
     if (valid[0] != ""):
         d = {"complete":"True", "name":valid[0], "code":code}
@@ -120,8 +128,6 @@ if (command == "check_event_code"):
     j = json.dumps(d)
     print j
         
-        
-
 if (command == "delete"):
     operations.delete_shelve()
     

@@ -5,8 +5,8 @@ import random
 key = "AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0"
 
 def get(starting_lat, starting_lon, ending_lat, ending_lon):
-    fh = urllib.urlopen("https://maps.googleapis.com/maps/api/distancematrix/json?traffic_model=best_guess&origins=%s,%s&destinations=%s,%s&departure_time=now&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0"
-         % (starting_lat, starting_lon, ending_lat, ending_lon))
+    url = "https://maps.googleapis.com/maps/api/distancematrix/json?traffic_model=best_guess&origins=%s,%s&destinations=%s,%s&departure_time=now&key=AIzaSyD9Cyy79DLP-pvlVVYB1rBCkZwNfojOhG0" % (starting_lat, starting_lon, ending_lat, ending_lon)
+    fh = urllib.urlopen(url)
     read = fh.read()
     load = json.loads(read)
     return load["rows"][0]["elements"][0]["duration"]["text"]

@@ -85,7 +85,7 @@
     		}
 
     		function setCodesOnLinks() {
-    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>User Settings</a></li>";
+    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>Change Username</a></li>";
     			document.getElementById("indestination").innerHTML = "<li><a href='changedestination.html?event="+code+"'>Change Destination</a></li>\
     			<li class='active'><a href='event.html?event=" + code + "'>Go to event</a></li><li><a href='https://maps.google.com?saddr=Current+Location&daddr=" + my_data.destination.lat + "," + my_data.destination.lon+ "' target='_blank'>Start Navigation</a></li>";
     			document.getElementById("indestination2").href = "https://maps.google.com?saddr=Current+Location&daddr=" + my_data.destination.lat + "," + my_data.destination.lon;
@@ -437,21 +437,21 @@
 			      		<span class="icon-bar"></span>
 			      		<span class="icon-bar"></span>
 		        	</button>
-	    			<a href="index.html" class="navbar-brand">
+	    			<a href="." class="navbar-brand">
 	    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
 	    			</a>
 				</div>
 	    		<div id="navbar" class="navbar-collapse collapse">
 	    			<ul class="nav navbar-nav theme">
-	      				<li class=""><a href="index.html">Home</a></li>
-	      				<li class="active"><a href="newevent.html">Create a New Event</a></li>
+	      				<li><a href=".">Home</a></li>
+	      				<li><a href="newevent.html">Create a New Event</a></li>
 	      				<li id="inuser" class="dropdown">
-	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Change Username</a>
 							<ul class="dropdown-menu">
 				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
 				          	</ul>
 				        </li>
-				        <li class="dropdown">
+				        <li class="active dropdown">
 				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Event <span class="caret"></span></a>
 				        	<ul id="indestination" class="dropdown-menu">
 				        		<li><a href="#">You are not in an event<br>Please join an even to go to your event.</a></li>

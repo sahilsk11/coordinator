@@ -80,7 +80,7 @@
     		}
 
     		function setCodesOnLinks() {
-    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>User Settings</a></li>";
+    			document.getElementById("inuser").innerHTML = "<a href='createuser.html?event=" + code + "'>Change Username</a></li>";
     			document.getElementById("indestination").innerHTML = "<li class='active'><a href='changedestination.html?event="+code+"'>Change Destination</a></li>\
     			<li><a href='event.html?event=" + code + "'>Go to event</a></li>";
     		}
@@ -111,10 +111,11 @@
 
 			function buttonClick() {
 			//generate url
-				if (auto_complete == undefined) {
+				if (auto_complete.geometry == undefined) {
 					displayError();
 				}
 				else {
+					console.log(auto_complete);
 				    lat = auto_complete.getPlace().geometry.location.lat();
 	    			lon = auto_complete.getPlace().geometry.location.lng();
 	    			
@@ -249,16 +250,16 @@
 			      		<span class="icon-bar"></span>
 			      		<span class="icon-bar"></span>
 		        	</button>
-	    			<a href="index.html" class="navbar-brand">
+	    			<a href="." class="navbar-brand">
 	    				<img src="Helper/Images/co-grey.png" class="logo" onmouseover="this.src='Helper/Images/co-white.png'" onmouseout="this.src='Helper/Images/co-grey.png'">
 	    			</a>
 				</div>
 	    		<div id="navbar" class="navbar-collapse collapse">
 	    			<ul class="nav navbar-nav theme">
-	      				<li class=""><a href="index.html">Home</a></li>
+	      				<li class=""><a href=".">Home</a></li>
 	      				<li><a href="newevent.html">Create a New Event</a></li>
 	      				<li id="inuser" class="dropdown">
-	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User Settings</a>
+	      					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Change Username</a>
 							<ul class="dropdown-menu">
 				            	<li><a href="#">You are not in an event<br>Please join an event to change user settings.</a></li>
 				          	</ul>
@@ -279,8 +280,12 @@
 			<hr width="65%" class="next-close">
 			<br>
 		</div>
-		<span class="col-xs-6 mid-font">
-			<form class="form-horizontal col-xs-11">
+		<div class="container-fluid">
+			<p class="text-center lead col-md-12">To set a destination, click on one of the suggested addresses from the list as you type.</p>
+		</div>
+		<div id="url" class="center"></div>
+		<div class="container-fluid mid-font">
+			<form class="form-horizontal col-xs-12">
 		 		<div class="form-group">
 		    		<label for="searchTextField" class="control-label">Destination:</label>
 		  			<input id="searchTextField" class="form-control" placeholder="Destination" onkeydown="if (event.keyCode == 13) {enterSubmit();return false;}">
@@ -288,13 +293,8 @@
 		  			<a href="#map"><button type="button" id="submit" onclick="buttonClick()" class="btn btn-default">Submit</button></a>
 		  		</div>
 			</form>
-		</span>
-		<span class="col-xs-6">
-			<h3 class="text-center title-font">To set a destination, click on one of the suggested addresses from the list as you type.</h3>
-		</span>
-		<button class="btn btn-default" onclick="setCurrent()">Set Current Location as Destination</button>
+		</div>
 		<div id="hr"></div>
-		<div id="url" class="col-xs-12 center"></div>
 		<br>
 		<iframe id="map" width="100%" height="400" frameborder="0">
   		</iframe>
